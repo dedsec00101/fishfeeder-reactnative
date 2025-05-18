@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+ActionBar {
+  background-color: #2E86C1;
+  color: white;
+}
+
+.gauge-container {
+  height: 120px;
+}
+
+button {
+  font-size: 14;
+}
+
+.tab-active {
+  color: #2E86C1;
+}
+
+.tab-inactive {
+  color: #A9A9A9;
+}
+
+.status-excellent {
+  color: #2ECC71;
+}
+
+.status-warning {
+  color: #F39C12;
+}
+
+.status-danger {
+  color: #E74C3C;
+}

@@ -1,0 +1,30 @@
+# NativeScript
+/platforms/
+/hooks/
+/node_modules/
+*.log
+*.tmp
+*.lock
+
+# Build artifacts
+/dist/
+/build/
+*.apk
+*.ipa
+
+# IDE files
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# TypeScript
+*.tsbuildinfo
+
+# Env files (if used)
+.env
+.env.*
