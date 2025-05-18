@@ -1,103 +1,57 @@
-import * as React from "react";
-import { Http } from "@nativescript/core";
+import { useEffect, useState } from "react";
+import { Http, HttpResponse } from "@nativescript/core";
 
-interface SensorData {
-    temperature: number;
-    ph: number;
-    ammonia: number;
-    lastUpdated: Date | null;
-}
+type ConnectionStatus = "connected" | "disconnected" | "connecting";
 
 export function useESP32Service() {
-    const [connectionStatus, setConnectionStatus] = React.useState<'connected' | 'disconnected' | 'connecting'>('disconnected');
-    const [esp32Address, setEsp32Address] = React.useState<string>('192.168.1.1');
-    const [sensorData, setSensorData] = React.useState<SensorData>({
-        temperature: 23.5,
-        ph: 7.2,
-        ammonia: 0.1,
-        lastUpdated: null
+    const [esp32Address, setESP32Address] = useState("http://192.168.0.100");
+    const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("disconnected");
+    const [sensorData, setSensorData] = useState({
+        temperature: 0,
+        ph: 0,
+        ammonia: 0,
     });
 
-    const connectToESP32 = () => {
-        setConnectionStatus('connecting');
-        setTimeout(() => {
-            setConnectionStatus('connected');
-            fetchSensorData();
-        }, 2000);
-    };
+    const connectToESP32 = async () => {
+        try {
+            setConnectionStatus("connecting");
 
-    const fetchSensorData = () => {
-        if (connectionStatus !== 'connected') {
-            return Promise.reject('Not connected to ESP32');
-        }
+            const response: HttpResponse = await Http.request({
+                url: `${esp32Address}/sensors`,
+                method: "GET",
+            });
 
-        return new Promise<SensorData>((resolve) => {
-            setTimeout(() => {
-                const newData = {
-                    temperature: 22 + Math.random() * 6,
-                    ph: 6.8 + Math.random() * 1.5,
-                    ammonia: Math.random() * 1.5,
-                    lastUpdated: new Date()
-                };
+            const content = response.content?.toString();
 
-                setSensorData(newData);
-                resolve(newData);
-            }, 1000);
-        });
-    };
-
-    const triggerFeeding = () => {
-        if (connectionStatus !== 'connected') {
-            return Promise.reject('Not connected to ESP32');
-        }
-
-        return new Promise<void>((resolve) => {
-            setTimeout(() => {
-                console.log("Feeding triggered manually");
-                resolve();
-            }, 1000);
-        });
-    };
-
-    const updateESP32Address = (address: string) => {
-        setEsp32Address(address);
-        setConnectionStatus('disconnected');
-    };
-
-    React.useEffect(() => {
-        if (connectionStatus === 'disconnected') {
-            if (sensorData.lastUpdated !== null) {
-                connectToESP32();
+            if (response.statusCode === 200 && content) {
+                const data = JSON.parse(content);
+                setSensorData(data);
+                setConnectionStatus("connected");
+            } else {
+                setConnectionStatus("disconnected");
             }
+        } catch (error) {
+            console.error("ESP32 connection error:", error);
+            setConnectionStatus("disconnected");
         }
-    }, [connectionStatus]);
+    };
 
-    React.useEffect(() => {
-        let interval: ReturnType<typeof setInterval>;
+    const updateESP32Address = (newAddress: string) => {
+        setESP32Address(newAddress);
+    };
 
-        if (connectionStatus === 'connected') {
-            interval = setInterval(() => {
-                fetchSensorData().catch(error => {
-                    console.error("Error fetching sensor data", error);
-                    setConnectionStatus('disconnected');
-                });
-            }, 10000);
-        }
-
-        return () => {
-            if (interval) {
-                clearInterval(interval);
-            }
-        };
-    }, [connectionStatus]);
+    useEffect(() => {
+        const interval = setInterval(() => {
+            connectToESP32();
+        }, 10000);
+        return () => clearInterval(interval);
+    }, [esp32Address]);
 
     return {
-        connectionStatus,
-        sensorData,
         esp32Address,
+        updateESP32Address,
+        connectionStatus,
         connectToESP32,
-        fetchSensorData,
-        triggerFeeding,
-        updateESP32Address
+        sensorData,
     };
 }

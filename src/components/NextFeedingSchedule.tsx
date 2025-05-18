@@ -1,5 +1,6 @@
 import * as React from "react";
 import { StyleSheet } from "react-nativescript";
+import { fetchRealTime } from "../services/TimeService";
 
 interface NextFeedingScheduleProps {
     nextFeeding: { time: string, relative: string } | null;

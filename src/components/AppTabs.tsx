@@ -6,25 +6,21 @@ export const AppTabs = () => {
 
     return (
         <gridLayout
-            columns="auto, auto"
-            padding={10}
-            backgroundColor="#eee"
+            columns="*, *"
             horizontalAlignment="center"
             verticalAlignment="bottom"
+            className="bg-gray-100 border-t border-gray-300 py-2 px-4"
         >
             <button
-                text="DASHBOARD"
                 col={0}
-                width={120}
-                height={40}
-                marginRight={8}
+                text="DASHBOARD"
+                className="text-blue-600 font-semibold"
                 onTap={() => navigation.navigate("Dashboard")}
             />
             <button
-                text="SCHEDULE"
                 col={1}
-                width={120}
-                height={40}
+                text="SCHEDULE"
+                className="text-blue-600 font-semibold"
                 onTap={() => navigation.navigate("Schedule")}
             />
         </gridLayout>
